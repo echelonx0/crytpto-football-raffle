@@ -1,0 +1,103 @@
+# ==============================
+# 💡 GENERAL / SYSTEM FILES
+# ==============================
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.history/
+.svn/
+swiftpm/
+migrate_working_dir/
+*.tmp
+*.bak
+
+# ==============================
+# 💻 IDE / EDITOR FILES
+# ==============================
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+.history/
+
+# ==============================
+# 🐦 FLUTTER / DART
+# ==============================
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# Build outputs
+build/
+coverage/
+!**/ios/Runner.xcodeproj/project.pbxproj  # keep core project file
+!**/ios/Runner.xcworkspace/contents.xcworkspacedata  # keep workspace definition
+
+# ==============================
+# 📱 ANDROID
+# ==============================
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# ==============================
+# 🍎 iOS / macOS
+# ==============================
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+xcuserdata/
+DerivedData/
+ios/Pods/
+
+# ==============================
+# 🔥 FIREBASE CONFIG
+# ==============================
+# These contain credentials or project IDs
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Safe to commit:
+# firebase.json
+# .firebaserc
+
+firebase-debug.log
+firebase-error.log
+
+# ==============================
+# ⚙️ ENVIRONMENT / SECRETS
+# ==============================
+.env
+.env.*
+**/serviceAccountKey.json
+**/credentials.json
+*.key
+*.pem
+
+# ==============================
+# 🌐 NODE / WEB BUILD OUTPUTS
+# ==============================
+node_modules/
+dist/
+
+# ==============================
+# 🔒 SYMBOLICATION / OBFUSCATION
+# ==============================
+app.*.symbols
+app.*.map.json
