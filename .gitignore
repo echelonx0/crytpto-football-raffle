@@ -72,6 +72,7 @@ ios/Pods/
 # These contain credentials or project IDs
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
 
 # Safe to commit:
 # firebase.json

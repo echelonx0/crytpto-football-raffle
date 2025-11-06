@@ -1,6 +1,14 @@
-import 'package:flutter/material.dart';
+// lib/features/raffle/widgets/prediction_bottom_modal.dart
 
-typedef OnPredictionSubmit = void Function(Map<String, dynamic> prediction);
+import 'package:flutter/material.dart';
+import '../../features/raffles/services/prediction-service.dart';
+
+typedef OnPredictionSubmit =
+    void Function({
+      required String prediction,
+      required String secret,
+      required String commit,
+    });
 
 class PredictionBottomModal extends StatefulWidget {
   final String teamA;
@@ -22,9 +30,14 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
     with SingleTickerProviderStateMixin {
   final _teamAScoreController = TextEditingController();
   final _teamBScoreController = TextEditingController();
+  final _predictionService = PredictionService();
 
   late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
+
+  String? _generatedSecret;
+  String? _generatedCommit;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -39,6 +52,9 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
         );
 
     _animationController.forward();
+
+    // Pre-generate secret (shown as "locked" icon to user)
+    _generatedSecret = _predictionService.generateSecret();
   }
 
   @override
@@ -49,22 +65,59 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
+    if (_isProcessing) return;
+
     final scoreA = int.tryParse(_teamAScoreController.text);
     final scoreB = int.tryParse(_teamBScoreController.text);
 
     if (scoreA == null || scoreB == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter valid scores'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showError('Enter valid scores');
       return;
     }
 
-    widget.onSubmit({'scoreA': scoreA, 'scoreB': scoreB});
-    Navigator.pop(context);
+    if (scoreA < 0 || scoreB < 0) {
+      _showError('Scores cannot be negative');
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+
+    try {
+      // Format prediction
+      final prediction = _predictionService.formatPrediction(
+        teamA: widget.teamA,
+        teamB: widget.teamB,
+        scoreA: scoreA,
+        scoreB: scoreB,
+      );
+
+      // Generate commit
+      final commit = _predictionService.generateCommit(
+        prediction,
+        _generatedSecret!,
+      );
+
+      _generatedCommit = commit;
+
+      // Pass data back to parent
+      widget.onSubmit(
+        prediction: prediction,
+        secret: _generatedSecret!,
+        commit: commit,
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      _showError('Failed to process prediction: $e');
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   @override
@@ -73,17 +126,34 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
       position: _slideAnimation,
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 12)],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Row(
+              children: [
+                const Icon(Icons.sports_soccer, color: Colors.green),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${widget.teamA} vs ${widget.teamB}',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.lock_outline, color: Colors.grey),
+              ],
+            ),
+            const SizedBox(height: 8),
             Text(
-              '${widget.teamA} vs ${widget.teamB}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Your prediction is encrypted and stored securely',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             ),
             const SizedBox(height: 16),
             Row(
@@ -97,6 +167,7 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      prefixIcon: const Icon(Icons.home),
                     ),
                   ),
                 ),
@@ -110,6 +181,7 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      prefixIcon: const Icon(Icons.sports),
                     ),
                   ),
                 ),
@@ -120,8 +192,14 @@ class _PredictionBottomModalState extends State<PredictionBottomModal>
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: _submit,
-                child: const Text('Submit Prediction'),
+                onPressed: _isProcessing ? null : _submit,
+                child: _isProcessing
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Submit Prediction'),
               ),
             ),
           ],

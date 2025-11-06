@@ -1,8 +1,7 @@
 name: fbolraffle
 description: "The Fooball Raffle App"
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -18,19 +17,20 @@ dependencies:
   cloud_functions: ^6.0.2
 
   # Web3 interactions
-  web3dart: ^2.7.3             
+  web3dart: ^2.7.3
   http: ^1.1.0
 
-
-  flutter_secure_storage: ^9.2.4 # Key encryption
+  flutter_secure_storage: ^9.2.2
+  encrypted_shared_preferences: ^3.0.1
   crypto: ^3.0.6
   encrypt: ^5.0.3
 
+  qr_flutter: ^4.1.0 # QR code display
+  mobile_scanner: ^7.1.2 # QR scanning
+  url_launcher: ^6.3.2 # Launch fiat on-ramp
+  firebase_messaging:
+    ^16.0.2 # Push notifications
 
-  qr_flutter: ^4.1.0            # QR code display
-  mobile_scanner: ^7.1.2       # QR scanning
-  url_launcher: ^6.3.2          # Launch fiat on-ramp
-  firebase_messaging: ^16.0.2   # Push notifications
 
     # State Management
   flutter_riverpod: ^2.4.9
@@ -40,21 +40,19 @@ dependencies:
   cached_network_image: ^3.3.0
   shimmer: ^3.0.0
   delayed_display: ^2.0.0
+  dotenv: ^4.2.0
 
   cupertino_icons: ^1.0.8
   wallet_connect_v2: ^1.0.9
+  convert: ^3.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^5.0.0
 
-
 flutter:
-
- 
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
@@ -62,4 +60,3 @@ flutter:
     - assets/images/
     - assets/raffle.png
     - assets/rktn-image.png
- 

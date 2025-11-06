@@ -1,9 +1,9 @@
 class ContractConfig {
   static const String raffleContractAddress =
-      '0x5c6A781D663B689b7975A6339AD3eDe910023C6d'; // ✅ SoccerRaffle
+      '0x5c6A781D663B689b7975A6339AD3eDe910023C6d';
 
   static const String raffleTokenAddress =
-      '0x07Aa1131A1C06B4680458b0547528272BB603358'; // ✅ RaffleToken
+      '0x07Aa1131A1C06B4680458b0547528272BB603358';
 
   // Network configuration
   static const String rpcUrl = 'https://rpc.sepolia-api.lisk.com';
@@ -12,6 +12,68 @@ class ContractConfig {
   // ✅ Complete SoccerRaffle ABI
   static const String raffleAbi = '''
   [
+  // Add to raffleAbi in contract_config.dart
+
+{
+  "inputs": [
+    {"internalType": "uint256", "name": "raffleId", "type": "uint256"},
+    {"internalType": "uint256", "name": "amount", "type": "uint256"},
+    {"internalType": "bytes32", "name": "predictionCommit", "type": "bytes32"}
+  ],
+  "name": "joinRaffle",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [
+    {"internalType": "uint256", "name": "raffleId", "type": "uint256"},
+    {"internalType": "string", "name": "prediction", "type": "string"},
+    {"internalType": "string", "name": "secret", "type": "string"}
+  ],
+  "name": "revealPrediction",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [
+    {"internalType": "uint256", "name": "raffleId", "type": "uint256"},
+    {"internalType": "string", "name": "result", "type": "string"}
+  ],
+  "name": "setMatchResult",
+  "outputs": [],
+  "stateMutability": "nonpayable",
+  "type": "function"
+},
+{
+  "inputs": [
+    {"internalType": "uint256", "name": "raffleId", "type": "uint256"},
+    {"internalType": "address", "name": "participant", "type": "address"}
+  ],
+  "name": "getParticipantPredictionReveal",
+  "outputs": [
+    {"internalType": "bool", "name": "revealed", "type": "bool"},
+    {"internalType": "string", "name": "prediction", "type": "string"}
+  ],
+  "stateMutability": "view",
+  "type": "function"
+},
+{
+  "inputs": [
+    {"internalType": "uint256", "name": "raffleId", "type": "uint256"}
+  ],
+  "name": "getRaffleWinnerInfo",
+  "outputs": [
+    {"internalType": "address", "name": "winner", "type": "address"},
+    {"internalType": "bool", "name": "seedRevealed", "type": "bool"},
+    {"internalType": "uint256", "name": "revealDeadline", "type": "uint256"},
+    {"internalType": "bool", "name": "resultSet", "type": "bool"},
+    {"internalType": "string", "name": "matchResult", "type": "string"}
+  ],
+  "stateMutability": "view",
+  "type": "function"
+},
     {
       "inputs": [
         {"internalType": "address", "name": "_token", "type": "address"},
@@ -278,8 +340,8 @@ class ContractConfig {
   ]
   ''';
 
-  // ERC20 ABI (already correct)
-  static const String erc20Abi = '''
+  // Raffle Token ABI
+  static const String raffleTokenABI = '''
   [
     {
       "inputs": [{"internalType": "address", "name": "account", "type": "address"}],

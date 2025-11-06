@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:web3dart/crypto.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart' as http;
@@ -31,7 +33,7 @@ class ContractService {
 
     // RaffleToken ERC20 contract
     _raffleTokenContract = DeployedContract(
-      ContractAbi.fromJson(ContractConfig.erc20Abi, 'RaffleToken'),
+      ContractAbi.fromJson(ContractConfig.raffleTokenABI, 'RaffleToken'),
       EthereumAddress.fromHex(ContractConfig.raffleTokenAddress),
     );
   }
@@ -363,5 +365,83 @@ class ContractService {
     } catch (e) {
       throw Exception('Failed to get participant bet: $e');
     }
+  }
+
+  /// Submit prediction commit when joining raffle
+  Future<String> joinRaffleWithPrediction({
+    required int raffleId,
+    required BigInt amount,
+    required String prediction,
+    required String secret,
+  }) async {
+    final credentials = await _walletManager.getCredentials();
+
+    // Generate commit: keccak256(abi.encodePacked(prediction, secret))
+    final commit = keccak256(utf8.encode(prediction + secret));
+
+    final function = _raffleContract.function('joinRaffle');
+    return await _client.sendTransaction(
+      credentials,
+      Transaction.callContract(
+        contract: _raffleContract,
+        function: function,
+        parameters: [BigInt.from(raffleId), amount, commit],
+      ),
+      chainId: ContractConfig.chainId,
+    );
+  }
+
+  /// Reveal prediction after raffle ends
+  Future<String> revealPrediction({
+    required int raffleId,
+    required String prediction,
+    required String secret,
+  }) async {
+    final credentials = await _walletManager.getCredentials();
+    final function = _raffleContract.function('revealPrediction');
+
+    return await _client.sendTransaction(
+      credentials,
+      Transaction.callContract(
+        contract: _raffleContract,
+        function: function,
+        parameters: [BigInt.from(raffleId), prediction, secret],
+      ),
+      chainId: ContractConfig.chainId,
+    );
+  }
+
+  /// Owner/oracle sets match result
+  Future<String> setMatchResult({
+    required int raffleId,
+    required String result,
+  }) async {
+    final credentials = await _walletManager.getCredentials();
+    final function = _raffleContract.function('setMatchResult');
+
+    return await _client.sendTransaction(
+      credentials,
+      Transaction.callContract(
+        contract: _raffleContract,
+        function: function,
+        parameters: [BigInt.from(raffleId), result],
+      ),
+      chainId: ContractConfig.chainId,
+    );
+  }
+
+  /// Check if user's prediction was revealed
+  Future<Map<String, dynamic>> getParticipantPrediction({
+    required int raffleId,
+    required String address,
+  }) async {
+    final function = _raffleContract.function('getParticipantPredictionReveal');
+    final result = await _client.call(
+      contract: _raffleContract,
+      function: function,
+      params: [BigInt.from(raffleId), EthereumAddress.fromHex(address)],
+    );
+
+    return {'revealed': result[0] as bool, 'prediction': result[1] as String};
   }
 }
